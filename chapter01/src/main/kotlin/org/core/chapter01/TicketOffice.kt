@@ -1,19 +1,24 @@
 package org.core.chapter01
 
 class TicketOffice(
-    val tickets : MutableList<Ticket>,
-    var amount: Long = 0
+    private val tickets : MutableList<Ticket>,
+    private var amount: Long = 0
 ) {
+    fun sellTicketTo(audience: Audience) {
+        val ticket = getTicket()
+        val amount = audience.buy(ticket)
+        plusAmount(amount)
+    }
 
-    fun getTicket(): Ticket {
+    private fun getTicket(): Ticket {
         return tickets.removeFirst()
     }
 
-    fun plusAmount(amount: Long) {
+    private fun plusAmount(amount: Long) {
         this.amount += amount
     }
 
-    fun minusAmount(amount: Long) {
+    private fun minusAmount(amount: Long) {
         this.amount -= amount
     }
 }
