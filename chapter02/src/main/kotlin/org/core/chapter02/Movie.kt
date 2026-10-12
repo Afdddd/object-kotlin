@@ -3,29 +3,28 @@ package org.core.chapter02
 import java.time.Duration
 
 /**
- * 다형성의 트레이드오프
+ * 할인 정책이 없을 경우 할인 금액이 0원이라는 사실을 결정하는 책임을 Discount가 아닌 Movie에서 함
  *
- * 할인정책 의존성이 없어 결합도가 낮다.
- * 새로운 할인정책이 추가되거나 수정, 삭제되도 Movie는 전혀 상관없다.
+ * 문제점
+ * "할인 금액 결정"이라는 책임이 DiscountPolicy(정책이 있을 때)와 Movie(정책이 없을 때)로 나뉜다.
+ * => "할인 유무를 로그로 남겨야한다."라는 기능이 추가되면 DiscountPolicy와 Movie 모두 수정해야한다.
  *
- * 가독성이 떨어진다.
- * Movie 코드만 봐서는 어떤 할인정책을 사용해 할인해주는지 모른다.
- * Movie의 인스턴스를 생성하는 로직을 찾아봐야한다.
- *
+ * null이 퍼진다.
+ * => "예상 할인액 보여주기" 같은 기능이 discountPolicy를 쓰는 다른 클래스에 생기면, 거기서 null이면 0원이라는 처리 구현해야한다.
  */
 
 class Movie(
     private val title: String,
     private val runningTime: Duration,
     private val fee: Money,
-    private val discountPolicy: DiscountPolicy
+    private val discountPolicy: DiscountPolicy?
 ) {
     fun getFee(): Money = fee
 
-    /**
-     * 어떤 할인 정책(일정 금액 할인, 비율 할인)으로 할인하는지 Movie는 모른다.
-     * 단지 discountPolicy에게 상영 정보를 메세지로 전달할뿐.
-     */
-
-    fun calculateMovieFee(screening: Screening): Money = fee.minus(discountPolicy.calculateDiscountAmount(screening))
+    fun calculateMovieFee(screening: Screening): Money {
+        if(discountPolicy == null) {
+            return fee
+        }
+        return fee.minus(discountPolicy.calculateDiscountAmount(screening))
+    }
 }
